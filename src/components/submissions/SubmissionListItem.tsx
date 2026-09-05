@@ -1,0 +1,95 @@
+import React from 'react';
+import {
+  CheckCircle2,
+  XCircle,
+  Clock,
+  AlertTriangle,
+  Code2,
+  ChevronRight,
+} from 'lucide-react';
+import { RecentSubmissionItem } from '../../types/profile';
+
+interface SubmissionListItemProps {
+  submission: RecentSubmissionItem;
+  onClick: () => void;
+}
+
+export const SubmissionListItem: React.FC<SubmissionListItemProps> = ({
+  submission,
+  onClick,
+}) => {
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'Accepted':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold text-xs">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            Accepted
+          </span>
+        );
+      case 'Wrong Answer':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-semibold text-xs">
+            <XCircle className="h-3.5 w-3.5" />
+            Wrong Answer
+          </span>
+        );
+      case 'Time Limit Exceeded':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-semibold text-xs">
+            <Clock className="h-3.5 w-3.5" />
+            Time Limit Exceeded
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-semibold text-xs">
+            <AlertTriangle className="h-3.5 w-3.5" />
+            {status}
+          </span>
+        );
+    }
+  };
+
+  return (
+    <tr
+      onClick={onClick}
+      className="group hover:bg-slate-800/60 transition-colors cursor-pointer border-b border-slate-800/50 text-sm"
+    >
+      {/* Status Badge */}
+      <td className="py-3.5 px-4 w-44">
+        {getStatusBadge(submission.status)}
+      </td>
+
+      {/* Problem Title */}
+      <td className="py-3.5 px-4">
+        <span className="font-semibold text-slate-100 group-hover:text-indigo-300 transition-colors">
+          {submission.problemTitle}
+        </span>
+      </td>
+
+      {/* Language */}
+      <td className="py-3.5 px-4 w-36">
+        <span className="inline-flex items-center gap-1 font-mono text-xs text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700/60">
+          <Code2 className="h-3 w-3 text-slate-400" />
+          {submission.language}
+        </span>
+      </td>
+
+      {/* Submitted Timestamp */}
+      <td className="py-3.5 px-4 w-36 font-mono text-xs text-slate-400">
+        {submission.timestamp}
+      </td>
+
+      {/* Code Viewer Action */}
+      <td className="py-3.5 px-4 w-28 text-right">
+        <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-400 group-hover:text-indigo-300 group-hover:translate-x-0.5 transition-all">
+          View Code
+          <ChevronRight className="h-3.5 w-3.5" />
+        </span>
+      </td>
+    </tr>
+  );
+};
+
+export default SubmissionListItem;

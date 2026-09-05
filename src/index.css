@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #0c1324;
+    color: #dce1fb;
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    overscroll-behavior: none;
+  }
+
+  main > :first-child { margin-top: 0 !important; }
+  main > :last-child { margin-bottom: 0 !important; }
+
+  /* Custom subtle scrollbars for IDE elements */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #070d1f;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #23293c;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3d494c;
+  }
+}
+
+@layer utilities {
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Font utility classes matching stitch design */
+  .font-code-sm { font-family: 'JetBrains Mono', monospace; font-size: 0.6875rem; line-height: 1.15rem; }
+  .font-code-md { font-family: 'JetBrains Mono', monospace; font-size: 0.8125rem; line-height: 1.35rem; }
+  .font-code-lg { font-family: 'JetBrains Mono', monospace; font-size: 0.9375rem; line-height: 1.5rem; }
+  .font-label-sm { font-family: 'JetBrains Mono', monospace; font-size: 0.6875rem; line-height: 0.875rem; letter-spacing: 0.05em; font-weight: 500; }
+  .font-label-md { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; line-height: 1rem; letter-spacing: 0.04em; font-weight: 500; }
+  .font-body-sm { font-family: 'Geist', sans-serif; font-size: 0.75rem; line-height: 1.25rem; }
+  .font-body-md { font-family: 'Geist', sans-serif; font-size: 0.875rem; line-height: 1.45rem; }
+  .font-body-lg { font-family: 'Geist', sans-serif; font-size: 1rem; line-height: 1.6rem; }
+  .font-headline-sm { font-family: 'Geist', sans-serif; font-size: 1.125rem; line-height: 1.5rem; letter-spacing: -0.01em; font-weight: 500; }
+  .font-headline-md { font-family: 'Geist', sans-serif; font-size: 1.25rem; line-height: 1.75rem; letter-spacing: -0.015em; font-weight: 500; }
+  .font-headline-lg { font-family: 'Geist', sans-serif; font-size: 1.5rem; line-height: 2rem; letter-spacing: -0.02em; font-weight: 600; }
+  .font-headline-xl { font-family: 'Geist', sans-serif; font-size: 2.25rem; line-height: 2.75rem; letter-spacing: -0.03em; font-weight: 600; }
+
+  /* Text size utilities matching stitch design */
+  .text-code-sm { font-size: 0.6875rem; line-height: 1.15rem; }
+  .text-code-md { font-size: 0.8125rem; line-height: 1.35rem; }
+  .text-code-lg { font-size: 0.9375rem; line-height: 1.5rem; }
+  .text-label-sm { font-size: 0.6875rem; line-height: 0.875rem; }
+  .text-label-md { font-size: 0.75rem; line-height: 1rem; }
+  .text-body-sm { font-size: 0.75rem; line-height: 1.25rem; }
+  .text-body-md { font-size: 0.875rem; line-height: 1.45rem; }
+  .text-body-lg { font-size: 1rem; line-height: 1.6rem; }
+  .text-headline-sm { font-size: 1.125rem; line-height: 1.5rem; }
+  .text-headline-md { font-size: 1.25rem; line-height: 1.75rem; }
+  .text-headline-lg { font-size: 1.5rem; line-height: 2rem; }
+  .text-headline-xl { font-size: 2.25rem; line-height: 2.75rem; }
+}
