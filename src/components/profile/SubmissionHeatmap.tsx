@@ -52,28 +52,43 @@ export const SubmissionHeatmap: React.FC<SubmissionHeatmapProps> = ({
     return result;
   }, [stats?.dailyCounts]);
 
-  const monthLabels = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ];
+  // Group weeks into month blocks with gaps
+  const monthBlocks = useMemo(() => {
+    const blocks: { monthName: string; weeks: { dateStr: string; count: number; dayOfWeek: number }[][] }[] = [];
+
+    weeks.forEach((week) => {
+      // Use the middle/first day of the week to determine month
+      const sampleDate = new Date(week[0].dateStr);
+      const monthName = sampleDate.toLocaleString('en-US', { month: 'short' });
+
+      let currentBlock = blocks[blocks.length - 1];
+      if (!currentBlock || currentBlock.monthName !== monthName) {
+        currentBlock = { monthName, weeks: [] };
+        blocks.push(currentBlock);
+      }
+      currentBlock.weeks.push(week);
+    });
+
+    return blocks;
+  }, [weeks]);
 
   const getCellColor = (count: number) => {
-    if (count === 0) return 'bg-slate-900 border-slate-800/80';
-    if (count === 1) return 'bg-emerald-950 border-emerald-800/60 text-emerald-400';
-    if (count <= 3) return 'bg-emerald-800/80 border-emerald-600/60 text-emerald-200';
-    if (count <= 5) return 'bg-emerald-600 border-emerald-500 text-white';
-    return 'bg-emerald-400 border-emerald-300 text-slate-950 shadow-sm shadow-emerald-400/50';
+    if (count === 0) return 'bg-[#111] border-[#2e2e2e]';
+    if (count === 1) return 'bg-[#1a3a1a] border-[#2d5a2d] text-[#84cc16]';
+    if (count <= 3) return 'bg-[#365314] border-[#4d7c0f] text-[#d9f99d]';
+    if (count <= 5) return 'bg-[#4d7c0f] border-[#65a30d] text-white';
+    return 'bg-[#84cc16] border-[#a3e635] text-[#0a0a0a] shadow-sm';
   };
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-6 backdrop-blur-md space-y-4">
+    <div className="rounded-xl p-4 sm:p-6 space-y-4" style={{ backgroundColor: '#1c1c1c', border: '1px solid #2e2e2e' }}>
       {/* Header Stat Line */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4" style={{ borderBottom: '1px solid #2e2e2e' }}>
         <div>
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-indigo-400" />
+          <h3 className="text-base font-bold text-white flex items-center gap-2" style={{ fontFamily: "'Doppio One', sans-serif" }}>
+            <Calendar className="h-4 w-4" style={{ color: '#84cc16' }} />
             <span>
-              <strong className="text-emerald-400 font-mono">
+              <strong className="font-mono" style={{ color: '#84cc16' }}>
                 {stats?.totalSubmissions ?? 0}
               </strong>{' '}
               submissions in the past one year
@@ -92,7 +107,8 @@ export const SubmissionHeatmap: React.FC<SubmissionHeatmapProps> = ({
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(e.target.value as 'Current' | '2025')}
-          className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
+          className="text-slate-300 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none font-mono cursor-pointer"
+          style={{ backgroundColor: '#111', border: '1px solid #2e2e2e' }}
         >
           <option value="Current">Current Year</option>
           <option value="2025">2025</option>
@@ -102,7 +118,7 @@ export const SubmissionHeatmap: React.FC<SubmissionHeatmapProps> = ({
       {/* Heatmap Grid Section */}
       {isLoading ? (
         <div className="py-12 flex justify-center items-center space-x-2 animate-pulse">
-          <div className="h-24 w-full bg-slate-800/60 rounded-lg" />
+          <div className="h-24 w-full rounded-lg" style={{ backgroundColor: '#111' }} />
         </div>
       ) : isError ? (
         <div className="py-8 text-center space-y-2">
@@ -111,7 +127,8 @@ export const SubmissionHeatmap: React.FC<SubmissionHeatmapProps> = ({
           {onRetry && (
             <button
               onClick={onRetry}
-              className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-medium"
+              className="inline-flex items-center gap-1 text-xs font-medium"
+              style={{ color: '#84cc16' }}
             >
               <RefreshCw className="h-3 w-3" /> Retry
             </button>
@@ -120,51 +137,41 @@ export const SubmissionHeatmap: React.FC<SubmissionHeatmapProps> = ({
       ) : (
         <div className="overflow-x-auto pt-2 pb-1">
           <div className="inline-block min-w-full">
-            {/* Months Label Header Row */}
-            <div className="flex text-[10px] text-slate-500 font-mono mb-2 pl-6 space-x-8">
-              {monthLabels.map((m) => (
-                <span key={m}>{m}</span>
-              ))}
-            </div>
-
-            {/* Heatmap Matrix: 7 rows (Sun-Sat), 52 cols */}
-            <div className="flex gap-1.5">
+            <div className="flex gap-2">
               {/* Day Labels Column */}
-              <div className="flex flex-col justify-between text-[10px] text-slate-500 font-mono py-0.5 pr-1">
+              <div className="flex flex-col justify-between text-[10px] text-slate-500 font-mono pt-5 pb-0.5 pr-2 select-none">
                 <span>Mon</span>
                 <span>Wed</span>
                 <span>Fri</span>
               </div>
 
-              {/* Grid Weeks */}
-              <div className="flex gap-1 flex-1">
-                {weeks.map((week, wIdx) => (
-                  <div key={wIdx} className="flex flex-col gap-1">
-                    {week.map((day) => (
-                      <div
-                        key={day.dateStr}
-                        title={`${day.count} submission${day.count === 1 ? '' : 's'} on ${day.dateStr}`}
-                        className={`h-3 w-3 rounded-sm border transition-transform hover:scale-125 hover:z-10 cursor-pointer ${getCellColor(
-                          day.count
-                        )}`}
-                      />
-                    ))}
+              {/* Month Blocks Container with gaps between months */}
+              <div className="flex gap-2.5">
+                {monthBlocks.map((block, bIdx) => (
+                  <div key={bIdx} className="flex flex-col gap-1.5">
+                    {/* Month Label Header */}
+                    <span className="text-[10px] text-slate-400 font-mono font-semibold h-3.5 leading-3.5 tracking-wide">
+                      {block.monthName}
+                    </span>
+                    {/* Weeks Columns for this Month */}
+                    <div className="flex gap-1">
+                      {block.weeks.map((week, wIdx) => (
+                        <div key={wIdx} className="flex flex-col gap-1">
+                          {week.map((day) => (
+                            <div
+                              key={day.dateStr}
+                              title={`${day.count} submission${day.count === 1 ? '' : 's'} on ${day.dateStr}`}
+                              className={`h-3 w-3 rounded-sm border transition-transform hover:scale-125 hover:z-10 cursor-pointer ${getCellColor(
+                                day.count
+                              )}`}
+                            />
+                          ))}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Legend Footer */}
-            <div className="flex items-center justify-end gap-2 mt-4 text-[11px] text-slate-400 font-mono">
-              <span>Less</span>
-              <div className="flex gap-1">
-                <div className="h-3 w-3 rounded-sm border border-slate-800 bg-slate-900" />
-                <div className="h-3 w-3 rounded-sm border border-emerald-800/60 bg-emerald-950" />
-                <div className="h-3 w-3 rounded-sm border border-emerald-600/60 bg-emerald-800/80" />
-                <div className="h-3 w-3 rounded-sm border border-emerald-500 bg-emerald-600" />
-                <div className="h-3 w-3 rounded-sm border border-emerald-300 bg-emerald-400" />
-              </div>
-              <span>More</span>
             </div>
           </div>
         </div>

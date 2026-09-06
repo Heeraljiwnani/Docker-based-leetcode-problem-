@@ -18,9 +18,9 @@ export const LanguageStatsList: React.FC<LanguageStatsListProps> = ({
   const maxCount = Math.max(...stats.map((s) => s.solvedCount), 1);
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 backdrop-blur-md space-y-3">
-      <div className="flex items-center gap-2 pb-2 border-b border-slate-800 text-sm font-semibold text-slate-200">
-        <Code2 className="h-4 w-4 text-indigo-400" />
+    <div className="rounded-xl p-4 space-y-3" style={{ backgroundColor: '#1c1c1c', border: '1px solid #2e2e2e' }}>
+      <div className="flex items-center gap-2 pb-2 text-sm font-semibold text-slate-200" style={{ borderBottom: '1px solid #2e2e2e', fontFamily: "'Doppio One', sans-serif" }}>
+        <Code2 className="h-4 w-4" style={{ color: '#84cc16' }} />
         <span>Languages Used</span>
       </div>
 
@@ -43,7 +43,8 @@ export const LanguageStatsList: React.FC<LanguageStatsListProps> = ({
           {onRetry && (
             <button
               onClick={onRetry}
-              className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-medium"
+              className="inline-flex items-center gap-1 text-xs font-medium"
+              style={{ color: '#84cc16' }}
             >
               <RefreshCw className="h-3 w-3" /> Retry
             </button>
@@ -65,10 +66,10 @@ export const LanguageStatsList: React.FC<LanguageStatsListProps> = ({
                     <strong className="text-white">{item.solvedCount}</strong> solved
                   </span>
                 </div>
-                <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#111' }}>
                   <div
-                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500"
-                    style={{ width: `${percentage}%` }}
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ width: `${percentage}%`, backgroundColor: '#84cc16' }}
                   />
                 </div>
               </div>

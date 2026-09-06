@@ -6,6 +6,57 @@ import { useProgress } from '../hooks/useProgress';
 import { useStreak } from '../hooks/useStreak';
 import { Difficulty } from '../types/problem';
 
+const TOPIC_SECTIONS = [
+  {
+    id: 'Arrays',
+    title: 'Arrays & Hashing',
+    description: 'Array traversal, hash tables, and set lookup problems',
+    icon: 'grid_view',
+    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    match: (tags: string[]) => tags.some((t) => ['array', 'arrays', 'hashmap', 'hashset'].includes(t.toLowerCase())),
+  },
+  {
+    id: 'Two Pointers',
+    title: 'Two Pointers',
+    description: 'In-place array manipulation and window pointers',
+    icon: 'alt_route',
+    badgeColor: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    match: (tags: string[]) => tags.some((t) => ['twopointers', 'two pointers', 'two-pointers'].includes(t.toLowerCase())),
+  },
+  {
+    id: 'Dynamic Programming',
+    title: 'Dynamic Programming',
+    description: 'Memoization, tabulation, and optimal substructure problems',
+    icon: 'auto_graph',
+    badgeColor: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    match: (tags: string[]) => tags.some((t) => ['dp', 'dynamic programming', 'dynamicprogramming'].includes(t.toLowerCase())),
+  },
+  {
+    id: 'Binary Search',
+    title: 'Binary Search',
+    description: 'Logarithmic search space partition problems',
+    icon: 'search',
+    badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    match: (tags: string[]) => tags.some((t) => ['binarysearch', 'binary search'].includes(t.toLowerCase())),
+  },
+  {
+    id: 'Strings',
+    title: 'Strings & Stack',
+    description: 'String parsing, matching, and stack sequence evaluation',
+    icon: 'match_case',
+    badgeColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    match: (tags: string[]) => tags.some((t) => ['string', 'strings', 'stack'].includes(t.toLowerCase())),
+  },
+  {
+    id: 'Math',
+    title: 'Math & Bit Manipulation',
+    description: 'Mathematical induction, bitwise XOR, and digit arithmetic',
+    icon: 'calculate',
+    badgeColor: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+    match: (tags: string[]) => tags.some((t) => ['math', 'bit manipulation', 'bitmanipulation'].includes(t.toLowerCase())),
+  },
+];
+
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
@@ -22,7 +73,7 @@ export const HomePage: React.FC = () => {
 
   const safeProblems = Array.isArray(problems) ? problems : [];
 
-  // Filter problems
+  // Filter problems by search & difficulty
   const filteredProblems = useMemo(() => {
     return safeProblems.filter((p) => {
       const matchesSearch =
@@ -35,13 +86,10 @@ export const HomePage: React.FC = () => {
         selectedStatus === 'all' ||
         (selectedStatus === 'solved' && p.solved) ||
         (selectedStatus === 'todo' && !p.solved);
-      const matchesTag =
-        selectedTag === 'All Topics' ||
-        (p.tags && p.tags.some((t) => t.toLowerCase().includes(selectedTag.toLowerCase())));
 
-      return matchesSearch && matchesDiff && matchesStatus && matchesTag;
+      return matchesSearch && matchesDiff && matchesStatus;
     });
-  }, [safeProblems, searchQuery, selectedDifficulty, selectedStatus, selectedTag]);
+  }, [safeProblems, searchQuery, selectedDifficulty, selectedStatus]);
 
   // Pagination
   const totalPages = Math.ceil(filteredProblems.length / itemsPerPage) || 1;
@@ -95,8 +143,11 @@ export const HomePage: React.FC = () => {
               <div className="flex flex-col gap-gutter-sm relative z-10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-gutter-sm">
-                    <span className="inline-flex items-center gap-1.5 px-gutter-sm py-0.5 rounded-full bg-surface-container-highest text-primary font-code-sm text-code-sm uppercase tracking-wider">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                    <span
+                      className="inline-flex items-center gap-1.5 px-gutter-sm py-0.5 rounded-full font-code-sm text-code-sm font-bold uppercase tracking-wider"
+                      style={{ backgroundColor: 'rgba(250, 204, 21, 0.15)', color: '#facc15', border: '1px solid rgba(250, 204, 21, 0.3)' }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#facc15' }} />
                       Daily Mission
                     </span>
                   </div>
@@ -117,14 +168,14 @@ export const HomePage: React.FC = () => {
                     </h2>
                   </div>
                   <div className="flex items-center gap-gutter-sm mt-1">
-                    <span className="px-2 py-0.5 rounded-full font-code-sm text-code-sm font-semibold bg-secondary/10 text-secondary border border-secondary/20">
+                    <span className="px-2 py-0.5 rounded-full font-code-sm text-code-sm font-bold bg-secondary/10 text-secondary border border-secondary/20">
                       MEDIUM
                     </span>
-                    <span className="text-on-surface-variant font-code-sm text-code-sm">Dynamic Programming</span>
-                    <span className="text-outline text-code-sm">•</span>
-                    <span className="text-on-surface-variant font-code-sm text-code-sm">Binary Search</span>
-                    <span className="text-outline text-code-sm">•</span>
-                    <span className="text-on-surface-variant font-code-sm text-code-sm">Acceptance: 54.3%</span>
+                    <span className="text-on-surface-variant font-code-sm text-code-sm font-bold">Dynamic Programming</span>
+                    <span className="text-outline text-code-sm font-bold">•</span>
+                    <span className="text-on-surface-variant font-code-sm text-code-sm font-bold">Binary Search</span>
+                    <span className="text-outline text-code-sm font-bold">•</span>
+                    <span className="text-on-surface-variant font-code-sm text-code-sm font-bold">Acceptance: 54.3%</span>
                   </div>
                 </div>
               </div>
@@ -132,8 +183,8 @@ export const HomePage: React.FC = () => {
               <div className="mt-gutter-lg pt-gutter-md flex items-center justify-between relative z-10 border-t border-outline-variant/30">
                 <div className="flex items-center gap-gutter-md font-code-sm text-code-sm text-on-surface-variant">
                   <span className="flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[16px] text-amber-400">check_circle</span>
-                    <span>4,892 Completed Today</span>
+                    <span className="material-symbols-outlined text-[16px]" style={{ color: '#facc15' }}>check_circle</span>
+                    <span className="font-bold">4,892 Completed Today</span>
                   </span>
                 </div>
                 <button
@@ -190,24 +241,6 @@ export const HomePage: React.FC = () => {
                     <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-[16px] pointer-events-none">unfold_more</span>
                   </div>
 
-                  {/* Status Filter */}
-                  <div className="relative">
-                    <select
-                      id="status-filter"
-                      value={selectedStatus}
-                      onChange={(e) => {
-                        setSelectedStatus(e.target.value as 'all' | 'solved' | 'todo');
-                        setCurrentPage(1);
-                      }}
-                      className="appearance-none bg-surface-container-lowest text-on-surface font-code-sm text-code-sm px-gutter-md py-2 pr-8 rounded-lg cursor-pointer focus:outline-none hover:bg-surface-container-high transition-colors"
-                    >
-                      <option value="all">Status: All</option>
-                      <option value="solved">Solved</option>
-                      <option value="todo">Todo</option>
-                    </select>
-                    <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-[16px] pointer-events-none">unfold_more</span>
-                  </div>
-
                   {/* Pick Random */}
                   <button
                     id="btn-shuffle"
@@ -231,11 +264,12 @@ export const HomePage: React.FC = () => {
                       setSelectedTag(tag);
                       setCurrentPage(1);
                     }}
-                    className={`px-2.5 py-1 rounded-full font-code-sm text-code-sm font-medium whitespace-nowrap transition-colors ${
+                    className={`px-2.5 py-1 rounded-full font-code-sm text-code-sm font-bold whitespace-nowrap transition-colors ${
                       selectedTag === tag
-                        ? 'bg-primary text-on-primary'
-                        : 'bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-bright'
+                        ? 'text-on-primary'
+                        : 'bg-surface-container-high text-white hover:bg-surface-bright'
                     }`}
+                    style={selectedTag === tag ? { backgroundColor: '#84cc16', color: '#0a0a0a' } : {}}
                   >
                     {tag}
                   </button>
@@ -243,154 +277,198 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Problems Catalog Table */}
-            <div className="bg-surface-container-low rounded-xl shadow-md overflow-hidden flex flex-col">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left font-body-sm text-body-sm text-on-surface">
-                  <thead className="bg-surface-container-lowest font-code-sm text-code-sm text-outline uppercase tracking-wider">
-                    <tr>
-                      <th className="py-3 px-gutter-md w-12 text-center" scope="col">Status</th>
-                      <th className="py-3 px-gutter-md w-16" scope="col">#</th>
-                      <th className="py-3 px-gutter-md min-w-[280px]" scope="col">Title</th>
-                      <th className="py-3 px-gutter-md w-32 text-right" scope="col">Acceptance</th>
-                      <th className="py-3 px-gutter-md w-28 text-center" scope="col">Difficulty</th>
-                      <th className="py-3 px-gutter-md w-16 text-center" scope="col"></th>
-                    </tr>
-                  </thead>
-                  <tbody id="problem-rows-container">
-                    {isLoadingProblems ? (
-                      <tr>
-                        <td colSpan={6} className="py-12 text-center text-on-surface-variant font-code-sm text-code-sm">
-                          Loading problem directory...
-                        </td>
-                      </tr>
-                    ) : paginatedProblems.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="py-12 text-center text-on-surface-variant font-code-sm text-code-sm">
-                          No problems match your filters.
-                        </td>
-                      </tr>
-                    ) : (
-                      paginatedProblems.map((p) => (
-                        <tr
-                          key={p.id}
-                          onClick={() => navigate(`/problems/${p.id}`)}
-                          className="problem-row hover:bg-surface-container transition-colors group cursor-pointer"
-                          data-difficulty={p.difficulty.toLowerCase()}
-                          data-status={p.solved ? 'solved' : 'todo'}
-                        >
-                          {/* Status Icon */}
-                          <td className="py-3 px-gutter-md text-center">
-                            {p.solved ? (
-                              <span className="material-symbols-outlined text-tertiary text-[18px]" title="Solved">check_circle</span>
-                            ) : (
-                              <span className="material-symbols-outlined text-outline text-[18px]" title="Not solved">circle</span>
-                            )}
-                          </td>
-
-                          {/* ID */}
-                          <td className="py-3 px-gutter-md font-code-sm text-code-sm text-outline">
-                            {p.id}
-                          </td>
-
-                          {/* Title */}
-                          <td className="py-3 px-gutter-md">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-on-surface group-hover:text-primary transition-colors">
-                                {p.title}
-                              </span>
-                            </div>
-                          </td>
-
-                          {/* Acceptance */}
-                          <td className="py-3 px-gutter-md font-code-sm text-code-sm text-right text-on-surface-variant">
-                            {p.acceptanceRate ? `${p.acceptanceRate}%` : '50.0%'}
-                          </td>
-
-                          {/* Difficulty */}
-                          <td className="py-3 px-gutter-md text-center">
-                            <span
-                              className={`inline-block px-2.5 py-0.5 rounded-full font-code-sm text-code-sm font-semibold ${
-                                p.difficulty === 'Easy'
-                                  ? 'bg-tertiary/10 text-tertiary'
-                                  : p.difficulty === 'Medium'
-                                  ? 'bg-secondary/10 text-secondary'
-                                  : 'bg-error/10 text-error'
-                              }`}
-                            >
-                              {p.difficulty.toUpperCase()}
-                            </span>
-                          </td>
-
-                          {/* Code Icon */}
-                          <td className="py-3 px-gutter-md text-center">
-                            <span className="material-symbols-outlined text-outline group-hover:text-on-surface transition-colors text-[18px]">code</span>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Pagination Footer */}
-              {!isLoadingProblems && filteredProblems.length > 0 && (
-                <div className="px-gutter-md py-3 bg-surface-container-lowest flex flex-col sm:flex-row items-center justify-between gap-3 font-code-sm text-code-sm text-on-surface-variant border-t border-outline-variant/30">
-                  <div>
-                    Showing <strong className="text-on-surface">{(currentPage - 1) * itemsPerPage + 1}</strong> to{' '}
-                    <strong className="text-on-surface">{Math.min(currentPage * itemsPerPage, filteredProblems.length)}</strong> of{' '}
-                    <strong className="text-on-surface">{filteredProblems.length}</strong> items
-                    {' '}• Rows: 10
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                      disabled={currentPage === 1}
-                      className="p-1.5 rounded bg-surface-container border border-outline-variant text-on-surface-variant hover:text-on-surface disabled:opacity-40 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">chevron_left</span>
-                    </button>
-
-                    {/* Page numbers */}
-                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((page) => (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={`px-2.5 py-1 rounded font-code-sm text-code-sm transition-colors ${
-                          currentPage === page
-                            ? 'bg-primary text-on-primary font-bold'
-                            : 'bg-surface-container border border-outline-variant text-on-surface-variant hover:text-on-surface'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    ))}
-
-                    {totalPages > 5 && (
-                      <>
-                        <span className="text-outline px-1">...</span>
-                        <button
-                          onClick={() => setCurrentPage(totalPages)}
-                          className={`px-2.5 py-1 rounded font-code-sm text-code-sm border border-outline-variant bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors ${
-                            currentPage === totalPages ? 'bg-primary text-on-primary font-bold' : ''
-                          }`}
-                        >
-                          {totalPages}
-                        </button>
-                      </>
-                    )}
-
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                      disabled={currentPage === totalPages}
-                      className="p-1.5 rounded bg-surface-container border border-outline-variant text-on-surface-variant hover:text-on-surface disabled:opacity-40 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-                    </button>
-                  </div>
+            {/* Problems Catalog Table & Topic View */}
+            <div className="flex flex-col gap-gutter-lg">
+              {isLoadingProblems ? (
+                <div className="bg-surface-container-low rounded-xl p-12 text-center text-on-surface-variant font-code-sm text-code-sm">
+                  Loading problem directory...
                 </div>
-              )}
+              ) : (() => {
+                const displaySections = selectedTag === 'All Topics'
+                  ? [
+                      {
+                        id: 'All Topics',
+                        title: 'All Topics',
+                        description: 'Comprehensive problem directory across all data structures and algorithmic patterns',
+                        icon: 'apps',
+                        badgeColor: 'bg-primary/10 text-primary border-primary/20',
+                        items: filteredProblems,
+                      },
+                    ]
+                  : TOPIC_SECTIONS.filter((sec) => {
+                      const tagNorm = selectedTag.toLowerCase().replace(/s$/, '');
+                      const secIdNorm = sec.id.toLowerCase().replace(/s$/, '');
+                      const secTitleNorm = sec.title.toLowerCase().replace(/s$/, '');
+                      return (
+                        secIdNorm.includes(tagNorm) ||
+                        tagNorm.includes(secIdNorm) ||
+                        secTitleNorm.includes(tagNorm) ||
+                        tagNorm.includes(secTitleNorm)
+                      );
+                    }).map((sec) => {
+                      const items = filteredProblems.filter((p) => sec.match(p.tags || []));
+                      return { ...sec, items };
+                    }).filter((sec) => sec.items.length > 0);
+
+                if (displaySections.length === 0) {
+                  return (
+                    <div className="bg-surface-container-low rounded-xl p-12 text-center text-on-surface-variant font-code-sm text-code-sm shadow-md">
+                      No problems match your selected filter or search query.
+                    </div>
+                  );
+                }
+
+                return displaySections.map((sec) => {
+                  const totalPages = Math.ceil(sec.items.length / itemsPerPage) || 1;
+                  const displayItems = selectedTag === 'All Topics'
+                    ? sec.items.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                    : sec.items;
+
+                  return (
+                    <div key={sec.id} className="bg-surface-container-low rounded-xl shadow-md overflow-hidden flex flex-col border border-outline-variant/30">
+                      {/* Topic Section Header */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between px-gutter-md py-3.5 bg-surface-container-lowest border-b border-outline-variant/40 gap-2">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(132,204,22,0.15)', color: '#84cc16' }}>
+                            <span className="material-symbols-outlined text-[18px]">{sec.icon}</span>
+                          </div>
+                          <div>
+                            <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                              {sec.title}
+                            </h2>
+                            <p className="text-xs text-on-surface-variant">{sec.description}</p>
+                          </div>
+                        </div>
+                        <span className={`self-start sm:self-auto text-xs px-2.5 py-0.5 rounded-full font-mono font-bold border ${sec.badgeColor}`}>
+                          {sec.items.length} {sec.items.length === 1 ? 'Problem' : 'Problems'}
+                        </span>
+                      </div>
+
+                      {/* Topic Table */}
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left font-body-sm text-body-sm text-on-surface">
+                          <thead className="bg-surface-container-lowest/60 font-code-sm text-code-sm font-bold text-white uppercase tracking-wider border-b border-outline-variant/30">
+                            <tr>
+                              <th className="py-2.5 px-gutter-md w-12 text-center" scope="col">Status</th>
+                              <th className="py-2.5 px-gutter-md w-16" scope="col">#</th>
+                              <th className="py-2.5 px-gutter-md min-w-[260px]" scope="col">Title</th>
+                              <th className="py-2.5 px-gutter-md w-32 text-right" scope="col">Acceptance</th>
+                              <th className="py-2.5 px-gutter-md w-28 text-center" scope="col">Difficulty</th>
+                              <th className="py-2.5 px-gutter-md w-16 text-center" scope="col"></th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-outline-variant/20">
+                            {displayItems.map((p) => (
+                              <tr
+                                key={p.id}
+                                onClick={() => navigate(`/problems/${p.id}`)}
+                                className="hover:bg-surface-container transition-colors group cursor-pointer"
+                              >
+                                {/* Status Icon */}
+                                <td className="py-2.5 px-gutter-md text-center">
+                                  {p.solved ? (
+                                    <span className="material-symbols-outlined text-[18px]" style={{ color: '#4ade80' }} title="Solved">check_circle</span>
+                                  ) : (
+                                    <span className="material-symbols-outlined text-outline text-[18px]" title="Not solved">circle</span>
+                                  )}
+                                </td>
+
+                                {/* ID */}
+                                <td className="py-2.5 px-gutter-md font-code-sm text-code-sm text-outline font-bold">
+                                  {p.id}
+                                </td>
+
+                                {/* Title */}
+                                <td className="py-2.5 px-gutter-md">
+                                  <span className="font-medium text-on-surface group-hover:text-primary transition-colors">
+                                    {p.title}
+                                  </span>
+                                </td>
+
+                                {/* Acceptance */}
+                                <td className="py-2.5 px-gutter-md font-code-sm text-code-sm text-right text-on-surface-variant">
+                                  {p.acceptanceRate ? `${p.acceptanceRate}%` : '50.0%'}
+                                </td>
+
+                                {/* Difficulty */}
+                                <td className="py-2.5 px-gutter-md text-center">
+                                  <span
+                                    className={`inline-block px-2.5 py-0.5 rounded-full font-code-sm text-code-sm font-bold border ${
+                                      p.difficulty === 'Easy'
+                                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                                        : p.difficulty === 'Medium'
+                                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                                        : 'bg-rose-500/20 text-rose-400 border-rose-500/40'
+                                    }`}
+                                  >
+                                    {p.difficulty.toUpperCase()}
+                                  </span>
+                                </td>
+
+                                {/* Code Icon */}
+                                <td className="py-2.5 px-gutter-md text-center">
+                                  <span className="material-symbols-outlined text-outline group-hover:text-on-surface transition-colors text-[18px]">code</span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Pagination Footer (10 items per page with Next/Prev Arrow navigation) */}
+                      {selectedTag === 'All Topics' && totalPages > 1 && (
+                        <div className="px-gutter-md py-3 bg-surface-container-lowest flex flex-col sm:flex-row items-center justify-between gap-3 font-code-sm text-code-sm text-on-surface-variant border-t border-outline-variant/30">
+                          <div>
+                            Showing <strong className="text-on-surface">{(currentPage - 1) * itemsPerPage + 1}</strong> to{' '}
+                            <strong className="text-on-surface">{Math.min(currentPage * itemsPerPage, sec.items.length)}</strong> of{' '}
+                            <strong className="text-on-surface">{sec.items.length}</strong> problems
+                          </div>
+
+                          <div className="flex items-center gap-1.5">
+                            {/* Previous Arrow */}
+                            <button
+                              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                              disabled={currentPage === 1}
+                              className="p-1.5 rounded-lg bg-surface-container border border-outline-variant text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                              title="Previous 10 Problems"
+                              aria-label="Previous Page"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                            </button>
+
+                            {/* Page Numbers */}
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                              <button
+                                key={page}
+                                onClick={() => setCurrentPage(page)}
+                                className={`px-3 py-1 rounded-lg font-code-sm text-code-sm font-bold transition-colors cursor-pointer ${
+                                  currentPage === page
+                                    ? 'text-on-primary font-bold'
+                                    : 'bg-surface-container border border-outline-variant text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high'
+                                }`}
+                                style={currentPage === page ? { backgroundColor: '#84cc16', color: '#0a0a0a' } : {}}
+                              >
+                                {page}
+                              </button>
+                            ))}
+
+                            {/* Next Arrow */}
+                            <button
+                              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                              disabled={currentPage === totalPages}
+                              className="p-1.5 rounded-lg bg-surface-container border border-outline-variant text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                              title="Next 10 Problems"
+                              aria-label="Next Page"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                });
+              })()}
             </div>
 
           </div>

@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useStreak } from '../../hooks/useStreak';
+import { Flame } from 'lucide-react';
+import navLogo from '../../../Logo/Remove_text_from_image_202609061111-removebg-preview.png';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
@@ -37,23 +39,37 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant">
+    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b border-outline-variant" style={{ backgroundColor: 'rgba(10,10,10,0.92)' }}>
       <div className="h-14 w-full px-gutter-lg flex items-center justify-between gap-gutter-md">
         {/* Left: Brand & Navigation */}
-        <div className="flex items-center gap-gutter-lg">
+        <div className="flex items-center gap-8">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-gutter-sm">
-            <div className="w-8 h-8 rounded bg-surface-container flex items-center justify-center border border-outline-variant text-primary">
-              <span className="material-symbols-outlined text-[18px]">terminal</span>
+          <Link to="/" className="flex items-center gap-2.5">
+            {/* Icon wrapper: sized at 44px for prominent visibility */}
+            <div style={{ width: '44px', height: '44px', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+              <img
+                src={navLogo}
+                alt="CodeArena Logo"
+                style={{
+                  position: 'absolute',
+                  width: '320%',
+                  height: '320%',
+                  maxWidth: 'none',
+                  maxHeight: 'none',
+                  top: '58%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  objectFit: 'contain',
+                }}
+              />
             </div>
-            <span className="font-headline-sm text-headline-sm font-semibold tracking-tight text-on-surface">
+            <span className="font-bold tracking-tight text-on-surface flex items-center" style={{ fontSize: '1.4rem', whiteSpace: 'nowrap', lineHeight: 1 }}>
               CodeArena
             </span>
-
           </Link>
 
           {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-gutter-xs" aria-label="Main Navigation">
+          <nav className="hidden md:flex items-center gap-2 ml-2" aria-label="Main Navigation">
             {navItems.map((item) => {
               const isActive =
                 item.path === '/'
@@ -65,11 +81,12 @@ export const Navbar: React.FC = () => {
                   key={item.name}
                   to={item.path}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`px-gutter-sm py-1 rounded font-body-sm text-body-sm transition-colors ${
+                  className={`px-gutter-sm py-1 rounded-lg font-body-sm text-body-sm font-bold transition-colors ${
                     isActive
-                      ? 'bg-surface-container-high text-on-surface font-semibold'
+                      ? 'text-on-primary'
                       : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
                   }`}
+                  style={isActive ? { backgroundColor: '#84cc16', color: '#0a0a0a' } : {}}
                 >
                   {item.name}
                 </Link>
@@ -87,8 +104,8 @@ export const Navbar: React.FC = () => {
             className="flex items-center gap-1.5 px-gutter-sm py-1 rounded-full bg-surface-container-low border border-outline-variant/40"
             title={`Current Streak: ${streak?.currentStreak || 7} Days`}
           >
-            <span className="material-symbols-outlined text-[16px] text-amber-400">bolt</span>
-            <span className="font-code-sm text-code-sm font-medium text-amber-400">
+            <Flame className="h-4 w-4 text-orange-500 fill-orange-500" />
+            <span className="font-code-sm text-code-sm font-bold text-orange-500">
               {streak?.currentStreak ?? 7} Days
             </span>
           </div>
@@ -104,17 +121,17 @@ export const Navbar: React.FC = () => {
               className="flex items-center gap-1.5 focus:outline-none"
             >
               <div className="relative">
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                  <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#84cc16' }}>
+                  <span className="material-symbols-outlined text-[18px]" style={{ color: '#0a0a0a' }}>person</span>
                 </div>
-                <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-tertiary ring-2 ring-surface-container-lowest" />
+                <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-tertiary ring-2" style={{ '--tw-ring-color': '#0a0a0a' } as React.CSSProperties} />
               </div>
               <span className="material-symbols-outlined text-on-surface-variant text-[18px]">expand_more</span>
             </button>
 
             {/* Dropdown Menu */}
             {isDropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-outline-variant bg-surface-container p-2 text-on-surface shadow-2xl backdrop-blur-lg z-50">
+              <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-outline-variant p-2 text-on-surface shadow-2xl backdrop-blur-lg z-50" style={{ backgroundColor: '#1c1c1c' }}>
                 <div className="px-gutter-sm py-2 border-b border-outline-variant mb-1">
                   <p className="font-body-sm text-body-sm font-semibold text-on-surface truncate">
                     {user?.name || 'Developer Account'}

@@ -147,7 +147,7 @@ export const ProblemListTable: React.FC<ProblemListTableProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-950/40 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <tr className="border-b border-slate-800 bg-slate-950/40 text-xs font-bold text-white uppercase tracking-wider">
                   <th className="py-3.5 px-4 w-12 text-center">Status</th>
                   <th className="py-3.5 px-4">Title</th>
                   <th className="py-3.5 px-4 w-32">Difficulty</th>
@@ -165,7 +165,7 @@ export const ProblemListTable: React.FC<ProblemListTableProps> = ({
                     {/* Status Icon */}
                     <td className="py-3.5 px-4 text-center">
                       {problem.solved ? (
-                        <CheckCircle2 className="h-5 w-5 text-emerald-400 inline-block" />
+                        <CheckCircle2 className="h-5 w-5 inline-block" style={{ color: '#4ade80' }} />
                       ) : (
                         <Circle className="h-5 w-5 text-slate-600 inline-block group-hover:text-slate-400" />
                       )}
@@ -173,21 +173,9 @@ export const ProblemListTable: React.FC<ProblemListTableProps> = ({
 
                     {/* Problem Title & Tags */}
                     <td className="py-3.5 px-4">
-                      <div className="font-medium text-slate-100 group-hover:text-indigo-300 transition-colors">
+                      <div className="font-medium text-slate-100 group-hover:text-indigo-300 transition-colors" style={{ fontFamily: "'Lexend Deca', 'PT Sans', sans-serif" }}>
                         {problem.title}
                       </div>
-                      {problem.tags && problem.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {problem.tags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
                     </td>
 
                     {/* Difficulty Badge */}
@@ -196,7 +184,7 @@ export const ProblemListTable: React.FC<ProblemListTableProps> = ({
                     </td>
 
                     {/* Acceptance Rate */}
-                    <td className="py-3.5 px-4 font-mono text-xs text-slate-400">
+                    <td className="py-3.5 px-4 font-mono text-xs font-bold text-white">
                       {problem.acceptanceRate !== undefined
                         ? `${problem.acceptanceRate}%`
                         : '—'}

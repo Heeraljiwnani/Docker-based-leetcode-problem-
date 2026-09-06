@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, Trophy, Calendar as CalendarIcon, RefreshCw, AlertCircle, Check } from 'lucide-react';
+import { Flame, Trophy, Calendar as CalendarIcon, RefreshCw, AlertCircle, Check } from 'lucide-react';
 import { StreakData } from '../../types/problem';
 
 interface StreakCalendarProps {
@@ -129,7 +129,7 @@ export const StreakCalendar: React.FC<StreakCalendarProps> = ({
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 backdrop-blur-md flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400 text-xs">
             <span>Current</span>
-            <Zap className="h-4 w-4 text-amber-500 fill-amber-500" />
+            <Flame className="h-4 w-4 text-orange-500 fill-orange-500" />
           </div>
           <div className="mt-2 flex items-baseline gap-1">
             <span className="text-2xl font-bold text-white font-mono">

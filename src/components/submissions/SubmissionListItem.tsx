@@ -54,7 +54,10 @@ export const SubmissionListItem: React.FC<SubmissionListItemProps> = ({
   return (
     <tr
       onClick={onClick}
-      className="group hover:bg-slate-800/60 transition-colors cursor-pointer border-b border-slate-800/50 text-sm"
+      className="group transition-colors cursor-pointer text-sm"
+      style={{ borderBottom: '1px solid #2e2e2e' }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLTableRowElement).style.backgroundColor = '#1e1e1e'; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.backgroundColor = 'transparent'; }}
     >
       {/* Status Badge */}
       <td className="py-3.5 px-4 w-44">
@@ -63,27 +66,27 @@ export const SubmissionListItem: React.FC<SubmissionListItemProps> = ({
 
       {/* Problem Title */}
       <td className="py-3.5 px-4">
-        <span className="font-semibold text-slate-100 group-hover:text-indigo-300 transition-colors">
+        <span className="font-semibold text-on-surface transition-colors group-hover:text-primary">
           {submission.problemTitle}
         </span>
       </td>
 
       {/* Language */}
       <td className="py-3.5 px-4 w-36">
-        <span className="inline-flex items-center gap-1 font-mono text-xs text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700/60">
-          <Code2 className="h-3 w-3 text-slate-400" />
+        <span className="inline-flex items-center gap-1 font-mono text-xs text-on-surface-variant px-2 py-0.5 rounded" style={{ backgroundColor: '#252525', border: '1px solid #333' }}>
+          <Code2 className="h-3 w-3 text-on-surface-variant" />
           {submission.language}
         </span>
       </td>
 
       {/* Submitted Timestamp */}
-      <td className="py-3.5 px-4 w-36 font-mono text-xs text-slate-400">
+      <td className="py-3.5 px-4 w-36 font-mono text-xs text-on-surface-variant">
         {submission.timestamp}
       </td>
 
       {/* Code Viewer Action */}
       <td className="py-3.5 px-4 w-28 text-right">
-        <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-400 group-hover:text-indigo-300 group-hover:translate-x-0.5 transition-all">
+        <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary group-hover:translate-x-0.5 transition-all">
           View Code
           <ChevronRight className="h-3.5 w-3.5" />
         </span>

@@ -46,20 +46,20 @@ export const SubmissionsPage: React.FC = () => {
   }, [submissions, currentPage, itemsPerPage]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen text-on-surface flex flex-col font-sans antialiased" style={{ backgroundColor: '#0a0a0a' }}>
       {/* Top Persistent Navbar */}
       <Navbar />
 
       {/* Main Viewport */}
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 py-6 sm:py-8 space-y-8">
         {/* Page Title */}
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
-            <History className="h-5 w-5" />
+        <div className="flex items-center gap-3 pt-6">
+          <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#84cc16' }}>
+            <History className="h-5 w-5" style={{ color: '#0a0a0a' }} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">Submission History</h1>
-            <p className="text-xs text-slate-400">
+            <h1 className="text-2xl font-bold text-on-surface">Submission History</h1>
+            <p className="text-xs text-on-surface-variant">
               Track your daily problem solving streak, submission stats, and code execution history.
             </p>
           </div>
@@ -87,27 +87,28 @@ export const SubmissionsPage: React.FC = () => {
           />
 
           {/* Table Container */}
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 backdrop-blur-md overflow-hidden shadow-xl">
+          <div className="rounded-xl overflow-hidden shadow-xl" style={{ backgroundColor: '#1c1c1c', border: '1px solid #2e2e2e' }}>
             {isLoadingList ? (
               /* Loading Skeletons */
               <div className="p-6 space-y-4">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex justify-between items-center animate-pulse py-3 border-b border-slate-800/60">
-                    <div className="h-4 w-28 bg-slate-800 rounded" />
-                    <div className="h-4 w-48 bg-slate-800 rounded" />
-                    <div className="h-4 w-20 bg-slate-800 rounded" />
+                  <div key={i} className="flex justify-between items-center animate-pulse py-3 border-b" style={{ borderColor: '#2e2e2e' }}>
+                    <div className="h-4 w-28 rounded" style={{ backgroundColor: '#252525' }} />
+                    <div className="h-4 w-48 rounded" style={{ backgroundColor: '#252525' }} />
+                    <div className="h-4 w-20 rounded" style={{ backgroundColor: '#252525' }} />
                   </div>
                 ))}
               </div>
             ) : isErrorList ? (
               /* Error State */
               <div className="p-12 text-center space-y-3">
-                <AlertCircle className="h-8 w-8 text-rose-400 mx-auto" />
-                <h3 className="text-lg font-semibold text-white">Failed to load submission history</h3>
-                <p className="text-sm text-slate-400">An error occurred while fetching your submissions.</p>
+                <AlertCircle className="h-8 w-8 text-error mx-auto" />
+                <h3 className="text-lg font-bold text-on-surface">Failed to load submission history</h3>
+                <p className="text-sm text-on-surface-variant">An error occurred while fetching your submissions.</p>
                 <button
                   onClick={refetchList}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors"
+                  style={{ backgroundColor: '#84cc16', color: '#0a0a0a' }}
                 >
                   <RefreshCw className="h-4 w-4" /> Retry
                 </button>
@@ -115,9 +116,9 @@ export const SubmissionsPage: React.FC = () => {
             ) : paginatedSubmissions.length === 0 ? (
               /* Empty State */
               <div className="p-12 text-center space-y-2">
-                <History className="h-10 w-10 text-slate-600 mx-auto" />
-                <h3 className="text-lg font-semibold text-slate-200">No submissions yet</h3>
-                <p className="text-sm text-slate-400">
+                <History className="h-10 w-10 mx-auto" style={{ color: '#2e2e2e' }} />
+                <h3 className="text-lg font-bold text-on-surface">No submissions yet</h3>
+                <p className="text-sm text-on-surface-variant">
                   {activeTab === 'Recent AC'
                     ? 'No accepted submissions found.'
                     : 'Submit your code on any problem to start building your history.'}
@@ -128,7 +129,7 @@ export const SubmissionsPage: React.FC = () => {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-800 bg-slate-950/40 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <tr className="text-xs font-bold text-white uppercase tracking-wider" style={{ borderBottom: '1px solid #2e2e2e', backgroundColor: '#111' }}>
                       <th className="py-3.5 px-4 w-44">Status</th>
                       <th className="py-3.5 px-4">Problem Title</th>
                       <th className="py-3.5 px-4 w-36">Language</th>
@@ -151,7 +152,7 @@ export const SubmissionsPage: React.FC = () => {
 
             {/* Pagination Controls */}
             {!isLoadingList && !isErrorList && submissions.length > 0 && (
-              <div className="flex items-center justify-between px-4 py-3 border-t border-slate-800 bg-slate-950/40 text-xs text-slate-400">
+              <div className="flex items-center justify-between px-4 py-3 text-xs text-on-surface-variant" style={{ borderTop: '1px solid #2e2e2e', backgroundColor: '#111' }}>
                 <span>
                   Showing {Math.min((currentPage - 1) * itemsPerPage + 1, submissions.length)} to{' '}
                   {Math.min(currentPage * itemsPerPage, submissions.length)} of{' '}
@@ -162,20 +163,22 @@ export const SubmissionsPage: React.FC = () => {
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                     disabled={currentPage === 1}
-                    className="p-1.5 rounded-md border border-slate-800 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="p-1.5 rounded-md disabled:opacity-40 disabled:cursor-not-allowed transition-colors hover:bg-surface-container"
+                    style={{ border: '1px solid #2e2e2e', backgroundColor: '#1c1c1c' }}
                     aria-label="Previous Page"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
 
-                  <span className="font-mono px-2 text-slate-200">
+                  <span className="font-mono px-2 text-on-surface">
                     {currentPage} / {totalPages}
                   </span>
 
                   <button
                     onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="p-1.5 rounded-md border border-slate-800 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="p-1.5 rounded-md disabled:opacity-40 disabled:cursor-not-allowed transition-colors hover:bg-surface-container"
+                    style={{ border: '1px solid #2e2e2e', backgroundColor: '#1c1c1c' }}
                     aria-label="Next Page"
                   >
                     <ChevronRight className="h-4 w-4" />

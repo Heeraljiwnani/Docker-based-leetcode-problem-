@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
+import CodeEditor from '../components/editor/CodeEditor';
 import { useBoilerplate } from '../hooks/useBoilerplate';
 import { useDraft } from '../hooks/useDraft';
 import { useRunCode } from '../hooks/useRunCode';
 import { useSubmitCode } from '../hooks/useSubmitCode';
+import { getProblemById, SEED_PROBLEMS } from '../data/problemsData';
 
 import {
   ArrowLeft,
@@ -15,26 +17,89 @@ import {
   Send,
   RotateCcw,
   Loader2,
-  Check,
   Terminal,
   FileCode,
   Cpu,
   BadgeCheck,
+  GripVertical,
+  GripHorizontal,
+  Lightbulb,
 } from 'lucide-react';
 
 export const ProblemSolvingPage: React.FC = () => {
   const { id = '1' } = useParams<{ id: string }>();
 
-  const [language, setLanguage] = useState<string>('ts');
+  // Fetch current problem details dynamically
+  const problem = getProblemById(id) || SEED_PROBLEMS[0];
+
+  const [language, setLanguage] = useState<string>('cpp');
   const [code, setCode] = useState<string>('');
-  const [activeLeftTab, setActiveLeftTab] = useState<'description' | 'editorial' | 'runs'>('description');
+  const [activeLeftTab, setActiveLeftTab] = useState<'description' | 'hints'>('description');
   const [activeConsoleTab, setActiveConsoleTab] = useState<'results' | 'logs' | 'diag'>('results');
   const [activeTestCase, setActiveTestCase] = useState<number>(1);
-  const [tcNums, setTcNums] = useState('[2, 7, 11, 15]');
-  const [tcTarget, setTcTarget] = useState('9');
+  const [tcInput, setTcInput] = useState<string>('');
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
+  // Update testcase input state when problem or active testcase changes
+  useEffect(() => {
+    if (problem.testcases && problem.testcases.length > 0) {
+      const tc = problem.testcases[activeTestCase - 1] || problem.testcases[0];
+      setTcInput(tc.input);
+    } else {
+      setTcInput(problem.examples || '');
+    }
+  }, [problem, activeTestCase]);
+
+  // Resizable Panes State
+  const [leftPanelWidth, setLeftPanelWidth] = useState<number>(45); // percentage width
+  const [consoleHeight, setConsoleHeight] = useState<number>(220); // pixel height
+  const [isDraggingVertical, setIsDraggingVertical] = useState<boolean>(false);
+  const [isDraggingHorizontal, setIsDraggingHorizontal] = useState<boolean>(false);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+
+  // Drag listeners
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDraggingVertical && containerRef.current) {
+        const containerRect = containerRef.current.getBoundingClientRect();
+        const newWidthPx = e.clientX - containerRect.left;
+        const newWidthPct = (newWidthPx / containerRect.width) * 100;
+        const clampedPct = Math.min(Math.max(newWidthPct, 20), 75);
+        setLeftPanelWidth(clampedPct);
+      }
+
+      if (isDraggingHorizontal && rightPanelRef.current) {
+        const rightRect = rightPanelRef.current.getBoundingClientRect();
+        const newHeightPx = rightRect.bottom - e.clientY;
+        const clampedHeight = Math.min(Math.max(newHeightPx, 80), 600);
+        setConsoleHeight(clampedHeight);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDraggingVertical(false);
+      setIsDraggingHorizontal(false);
+    };
+
+    if (isDraggingVertical || isDraggingHorizontal) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = isDraggingVertical ? 'col-resize' : 'row-resize';
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    };
+  }, [isDraggingVertical, isDraggingHorizontal]);
+
+  // Timer logic
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
     if (isTimerRunning) {
@@ -64,39 +129,20 @@ export const ProblemSolvingPage: React.FC = () => {
     setTimerSeconds(0);
   };
 
-  const { boilerplate } = useBoilerplate(id, language);
-  const { draft, saveStatus, saveDraft } = useDraft(id, language);
+  const { boilerplate } = useBoilerplate(problem.id, language);
+  const { draft, draftLoaded, saveStatus, saveDraft } = useDraft(problem.id, language);
   const { runCode, isRunning, result: runResult } = useRunCode();
   const { submitCode, isSubmitting, result: submitResult } = useSubmitCode();
 
+  // Set initial code: wait until draft fetch is complete AND boilerplate is ready
   useEffect(() => {
-    if (draft !== null) {
+    if (!draftLoaded || !boilerplate) return; // not ready yet
+    if (draft !== null && draft.trim() !== '') {
       setCode(draft);
-    } else if (boilerplate) {
-      setCode(boilerplate);
     } else {
-      setCode(`// Complexity: O(n) Time | O(n) Memory Space
-function twoSum(nums: number[], target: number): number[] {
-    const numMap = new Map<number, number>();
-
-    for (let i = 0; i < nums.length; i++) {
-        const complement = target - nums[i];
-        if (numMap.has(complement)) {
-            return [numMap.get(complement)!, i];
-        }
-        numMap.set(nums[i], i);
+      setCode(boilerplate);
     }
-
-    return []; // No solution found matching invariants
-}`);
-    }
-  }, [draft, boilerplate, language]);
-
-  const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value;
-    setCode(val);
-    saveDraft(val);
-  };
+  }, [draftLoaded, draft, boilerplate, language]);
 
   const handleReset = () => {
     if (boilerplate) {
@@ -107,68 +153,66 @@ function twoSum(nums: number[], target: number): number[] {
 
   const handleRun = () => {
     setActiveConsoleTab('results');
-    runCode(id, language, code);
+    runCode(problem.id, language, code);
   };
 
   const handleSubmit = () => {
     setActiveConsoleTab('results');
-    submitCode(id, language, code);
-  };
-
-  const handleTestCaseSwitch = (caseId: number) => {
-    setActiveTestCase(caseId);
-    if (caseId === 1) {
-      setTcNums('[2, 7, 11, 15]');
-      setTcTarget('9');
-    } else if (caseId === 2) {
-      setTcNums('[3, 2, 4]');
-      setTcTarget('6');
-    } else {
-      setTcNums('[3, 3]');
-      setTcTarget('6');
-    }
+    submitCode(problem.id, language, code);
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans antialiased overflow-hidden select-none">
+    <div className="min-h-screen text-on-surface flex flex-col font-sans antialiased overflow-hidden select-none" style={{ backgroundColor: '#0a0a0a' }}>
       {/* Top Navbar */}
       <Navbar />
 
       {/* Main Viewport */}
-      <main className="w-full pt-14 bg-slate-950 flex flex-col h-screen overflow-hidden">
+      <main className="w-full pt-14 flex flex-col h-screen overflow-hidden" style={{ backgroundColor: '#0a0a0a' }}>
         {/* Workspace Telemetry Bar */}
-        <div className="h-10 w-full bg-slate-900 flex items-center justify-between px-4 sm:px-6 flex-shrink-0 border-b border-slate-800 font-mono text-xs">
+        <div className="h-10 w-full flex items-center justify-between px-4 sm:px-6 flex-shrink-0 font-mono text-xs" style={{ backgroundColor: '#111', borderBottom: '1px solid #2e2e2e' }}>
           <div className="flex items-center gap-3">
             <Link
               to="/problems"
-              className="flex items-center gap-1.5 text-white hover:text-cyan-400 transition-colors font-bold"
+              className="flex items-center gap-1.5 transition-colors font-bold hover:opacity-80"
+              style={{ color: '#84cc16' }}
             >
-              <ArrowLeft className="h-4 w-4 stroke-[3] text-cyan-400" />
+              <ArrowLeft className="h-4 w-4 stroke-[3]" style={{ color: '#84cc16' }} />
               <span className="font-bold text-white font-sans text-sm">Problems</span>
             </Link>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-white font-sans text-sm">
-                Two Sum
+              <span className="font-bold text-white font-sans text-sm" style={{ fontFamily: "'Doppio One', sans-serif" }}>
+                {problem.title}
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold uppercase">
-                Easy
+              <span
+                className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase"
+                style={
+                  problem.difficulty === 'Easy'
+                    ? { backgroundColor: 'rgba(132, 204, 22, 0.15)', color: '#84cc16', border: '1px solid rgba(132, 204, 22, 0.3)' }
+                    : problem.difficulty === 'Medium'
+                    ? { backgroundColor: 'rgba(251, 191, 36, 0.15)', color: '#fbbf24', border: '1px solid rgba(251, 191, 36, 0.3)' }
+                    : { backgroundColor: 'rgba(248, 113, 113, 0.15)', color: '#f87171', border: '1px solid rgba(248, 113, 113, 0.3)' }
+                }
+              >
+                {problem.difficulty}
               </span>
-              <span className="flex items-center gap-1 text-emerald-400 text-xs ml-1">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                <span>Solved</span>
-              </span>
+              {problem.solved && (
+                <span className="flex items-center gap-1 text-xs ml-1" style={{ color: '#84cc16' }}>
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <span>Solved</span>
+                </span>
+              )}
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-3 text-slate-400">
+            <div className="hidden md:flex items-center gap-3 text-slate-400" style={{ fontFamily: "'Roboto Condensed', 'Lexend Deca', sans-serif" }}>
               <div className="flex items-center gap-1">
-                <Cpu className="h-3.5 w-3.5 text-emerald-400" />
-                <span>Avg: <strong className="text-white">52ms</strong></span>
+                <Cpu className="h-3.5 w-3.5" style={{ color: '#84cc16' }} />
+                <span>Avg: <strong className="text-white">48ms</strong></span>
               </div>
               <span>•</span>
               <div>
-                <span>Acceptance: <strong className="text-white">52.4%</strong></span>
+                <span>Acceptance: <strong className="text-white">{problem.acceptanceRate ?? 50}%</strong></span>
               </div>
             </div>
 
@@ -177,11 +221,12 @@ function twoSum(nums: number[], target: number): number[] {
                 type="button"
                 onClick={handleToggleTimer}
                 title={isTimerRunning ? 'Pause Stopwatch' : 'Start Stopwatch'}
-                className={`px-2.5 py-1 rounded border flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded flex items-center gap-1.5 transition-all cursor-pointer ${
                   isTimerRunning
                     ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                    : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700'
+                    : 'text-slate-300 hover:text-white'
                 }`}
+                style={!isTimerRunning ? { backgroundColor: '#252525', border: '1px solid #333' } : { border: '1px solid rgba(245, 158, 11, 0.3)' }}
               >
                 <Timer className={`h-3.5 w-3.5 ${isTimerRunning ? 'text-amber-400 animate-pulse' : 'text-slate-400'}`} />
                 <span className="font-mono text-xs">{formatTimer(timerSeconds)}</span>
@@ -191,7 +236,8 @@ function twoSum(nums: number[], target: number): number[] {
                 type="button"
                 onClick={handleResetTimer}
                 title="Reset Stopwatch to 00:00"
-                className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition-colors cursor-pointer"
+                className="p-1 rounded text-slate-400 hover:text-white transition-colors cursor-pointer"
+                style={{ backgroundColor: '#252525', border: '1px solid #333' }}
               >
                 <RotateCcw className="h-3.5 w-3.5" />
               </button>
@@ -200,197 +246,190 @@ function twoSum(nums: number[], target: number): number[] {
         </div>
 
         {/* Workspace Split Panels */}
-        <div className="flex-1 flex flex-col lg:flex-row w-full overflow-hidden relative">
-          {/* LEFT PANE: Description & Testcases */}
-          <div className="w-full lg:w-[48%] xl:w-[45%] flex flex-col bg-slate-900 border-r border-slate-800 overflow-hidden h-full">
+        <div ref={containerRef} className="flex-1 flex flex-col lg:flex-row w-full overflow-hidden relative">
+          {/* LEFT PANE: Description, Editorial, Hints & Testcases */}
+          <div
+            className="w-full lg:h-full flex flex-col overflow-hidden"
+            style={{
+              width: `${leftPanelWidth}%`,
+              backgroundColor: '#1c1c1c',
+              borderRight: '1px solid #2e2e2e',
+            }}
+          >
             {/* Tabs */}
-            <div className="h-9 bg-slate-950 flex items-center px-2 justify-between flex-shrink-0 border-b border-slate-800 font-mono text-xs">
+            <div className="h-9 flex items-center px-2 justify-between flex-shrink-0 text-xs" style={{ backgroundColor: '#111', borderBottom: '1px solid #2e2e2e', fontFamily: "'Roboto Condensed', 'Lexend Deca', sans-serif" }}>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setActiveLeftTab('description')}
-                  className={`px-3 py-1.5 rounded-t flex items-center gap-1.5 font-medium transition-colors ${
-                    activeLeftTab === 'description'
-                      ? 'bg-slate-900 text-cyan-400 border-t-2 border-cyan-400'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
-                  }`}
+                  className="px-3 py-1.5 rounded-t flex items-center gap-1.5 font-medium transition-colors"
+                  style={activeLeftTab === 'description' ? { backgroundColor: '#1c1c1c', borderTop: '2px solid #84cc16', color: '#84cc16' } : { color: '#a0a0a0' }}
                 >
                   <BookOpen className="h-3.5 w-3.5" />
                   <span>Description</span>
                 </button>
+
+
+                {problem.hints && (
+                  <button
+                    onClick={() => setActiveLeftTab('hints')}
+                    className="px-3 py-1.5 rounded-t flex items-center gap-1.5 font-medium transition-colors"
+                    style={activeLeftTab === 'hints' ? { backgroundColor: '#1c1c1c', borderTop: '2px solid #84cc16', color: '#84cc16' } : { color: '#a0a0a0' }}
+                  >
+                    <Lightbulb className="h-3.5 w-3.5" />
+                    <span>Hints</span>
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Description Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 text-slate-300 text-sm leading-relaxed">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h1 className="text-xl font-bold text-white tracking-tight">
-                    1. Two Sum
-                  </h1>
-                  <div className="flex items-center gap-2 font-mono text-xs">
-                    <span className="px-2 py-0.5 rounded bg-slate-800 text-cyan-400 border border-slate-700">
-                      Array
-                    </span>
-                    <span className="px-2 py-0.5 rounded bg-slate-800 text-cyan-400 border border-slate-700">
-                      Hash Table
-                    </span>
-                  </div>
-                </div>
-
-                <p>
-                  Given an array of integers{' '}
-                  <code className="px-1.5 py-0.5 rounded bg-slate-800 text-cyan-400 font-mono text-xs">
-                    nums
-                  </code>{' '}
-                  and an integer{' '}
-                  <code className="px-1.5 py-0.5 rounded bg-slate-800 text-cyan-400 font-mono text-xs">
-                    target
-                  </code>
-                  , return <em>indices of the two numbers such that they add up to target</em>.
-                </p>
-                <p>
-                  You may assume that each input would have <strong>exactly one solution</strong>, and you may not use the same element twice.
-                </p>
-              </div>
-
-              {/* Algorithmic Complexity Target Card */}
-              <div className="p-4 rounded-xl bg-slate-950 flex flex-col gap-2 border border-slate-800 font-mono text-xs">
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-500 uppercase tracking-wider text-[11px]">
-                    Complexity Target
-                  </span>
-                  <span className="text-emerald-400 font-semibold">
-                    Optimal: O(n) Time / O(n) Space
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-2 pt-1 text-[11px]">
-                  <div className="bg-slate-900 p-2 rounded border border-slate-800 flex flex-col gap-1">
-                    <span className="text-slate-500">Brute-Force</span>
-                    <span className="text-rose-400 font-semibold">O(n²) Time</span>
-                    <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden mt-1">
-                      <div className="h-full bg-rose-500 w-full" />
+            {/* Tab Contents */}
+            <div className="font-exclude flex-1 overflow-y-auto p-6 space-y-6 text-slate-300 text-sm leading-relaxed">
+              {activeLeftTab === 'description' && (
+                <>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h1 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Doppio One', sans-serif" }}>
+                        {problem.title}
+                      </h1>
+                      <div className="flex items-center gap-2 font-mono text-xs">
+                        {problem.tags?.map((t) => (
+                          <span key={t} className="px-2 py-0.5 rounded" style={{ backgroundColor: '#252525', color: '#84cc16', border: '1px solid #333' }}>
+                            {t}
+                          </span>
+                        ))}
+                      </div>
                     </div>
+
+                    <p className="text-slate-200 leading-relaxed font-sans text-base">
+                      {problem.statement}
+                    </p>
+
+                    {problem.constraints && (
+                      <div className="mt-3 p-3 rounded-lg font-mono text-xs" style={{ backgroundColor: '#111', border: '1px solid #2e2e2e' }}>
+                        <span className="text-slate-500 uppercase font-semibold text-[10px] block mb-1">Constraints</span>
+                        <code style={{ color: '#84cc16' }}>{problem.constraints}</code>
+                      </div>
+                    )}
                   </div>
-                  <div className="bg-slate-900 p-2 rounded border border-slate-800 flex flex-col gap-1">
-                    <span className="text-slate-500">Sort + 2-Ptr</span>
-                    <span className="text-purple-400 font-semibold">O(n log n)</span>
-                    <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden mt-1">
-                      <div className="h-full bg-purple-400 w-3/5" />
+
+                  {/* Company Tags */}
+                  {problem.companyTags && problem.companyTags.length > 0 && (
+                    <div className="space-y-1.5">
+                      <span className="text-xs text-slate-500 uppercase font-mono font-semibold">Companies</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {problem.companyTags.map((company) => (
+                          <span key={company} className="px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: '#252525', color: '#a0a0a0', border: '1px solid #333' }}>
+                            {company}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div className="bg-slate-900 p-2 rounded border border-cyan-500/40 flex flex-col gap-1 shadow-sm">
-                    <span className="text-cyan-400 font-semibold flex items-center gap-1">
-                      Hash Map <BadgeCheck className="h-3 w-3 text-emerald-400" />
-                    </span>
-                    <span className="text-emerald-400 font-semibold">O(n) Linear</span>
-                    <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden mt-1">
-                      <div className="h-full bg-emerald-400 w-1/4" />
+                  )}
+
+                  {/* Examples */}
+                  {problem.examples && (
+                    <div className="space-y-4 font-mono text-xs pt-2">
+                      <h2 className="text-sm font-bold text-white flex items-center gap-2 font-sans" style={{ fontFamily: "'Doppio One', sans-serif" }}>
+                        <Terminal className="h-4 w-4" style={{ color: '#84cc16' }} />
+                        <span>Example</span>
+                      </h2>
+
+                      <div className="p-3.5 rounded-xl space-y-2" style={{ backgroundColor: '#111', border: '1px solid #2e2e2e' }}>
+                        <div className="text-slate-300 font-mono text-xs">
+                          {problem.examples}
+                        </div>
+                      </div>
                     </div>
+                  )}
+                </>
+              )}
+
+              {activeLeftTab === 'hints' && (
+                <div className="space-y-4 font-sans">
+                  <h2 className="text-lg font-bold text-white flex items-center gap-2" style={{ fontFamily: "'Doppio One', sans-serif" }}>
+                    <Lightbulb className="h-4 w-4" style={{ color: '#fbbf24' }} />
+                    <span>Problem Hint</span>
+                  </h2>
+                  <div className="p-4 rounded-xl space-y-3 leading-relaxed text-amber-300 text-sm" style={{ backgroundColor: 'rgba(251, 191, 36, 0.1)', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
+                    <p>{problem.hints}</p>
                   </div>
                 </div>
-              </div>
-
-              {/* Examples */}
-              <div className="space-y-4 font-mono text-xs">
-                <h2 className="text-sm font-bold text-white flex items-center gap-2 font-sans">
-                  <Terminal className="h-4 w-4 text-cyan-400" />
-                  <span>Examples</span>
-                </h2>
-
-                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-                  <div className="flex justify-between items-center text-cyan-400 font-semibold">
-                    <span>Example 1</span>
-                    <span className="text-slate-500 text-[11px]">Base Case</span>
-                  </div>
-                  <div className="space-y-1 text-slate-300">
-                    <div><span className="text-slate-500">Input:</span> nums = [2,7,11,15], target = 9</div>
-                    <div><span className="text-slate-500">Output:</span> <span className="text-emerald-400 font-bold">[0,1]</span></div>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-                  <div className="flex justify-between items-center text-cyan-400 font-semibold">
-                    <span>Example 2</span>
-                    <span className="text-slate-500 text-[11px]">Duplicates</span>
-                  </div>
-                  <div className="space-y-1 text-slate-300">
-                    <div><span className="text-slate-500">Input:</span> nums = [3,2,4], target = 6</div>
-                    <div><span className="text-slate-500">Output:</span> <span className="text-emerald-400 font-bold">[1,2]</span></div>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Test Case Inspector Dock */}
-            <div className="bg-slate-950 flex flex-col flex-shrink-0 h-44 border-t border-slate-800 font-mono text-xs">
-              <div className="h-8 bg-slate-900 flex items-center justify-between px-3 border-b border-slate-800">
+            <div className="flex flex-col flex-shrink-0 h-44 text-xs" style={{ backgroundColor: '#111', borderTop: '1px solid #2e2e2e', fontFamily: "'Roboto Condensed', 'Lexend Deca', sans-serif" }}>
+              <div className="h-8 flex items-center justify-between px-3" style={{ backgroundColor: '#1c1c1c', borderBottom: '1px solid #2e2e2e' }}>
                 <div className="flex items-center gap-1.5 text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
-                  <Play className="h-3.5 w-3.5 text-cyan-400" />
+                  <Play className="h-3.5 w-3.5" style={{ color: '#84cc16' }} />
                   <span>Testcases</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => handleTestCaseSwitch(1)}
-                    className={`px-2.5 py-0.5 rounded flex items-center gap-1 transition-colors ${
-                      activeTestCase === 1
-                        ? 'bg-slate-800 text-emerald-400 font-bold'
-                        : 'text-slate-400 hover:bg-slate-800'
-                    }`}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    <span>Case 1</span>
-                  </button>
-                  <button
-                    onClick={() => handleTestCaseSwitch(2)}
-                    className={`px-2.5 py-0.5 rounded flex items-center gap-1 transition-colors ${
-                      activeTestCase === 2
-                        ? 'bg-slate-800 text-emerald-400 font-bold'
-                        : 'text-slate-400 hover:bg-slate-800'
-                    }`}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    <span>Case 2</span>
-                  </button>
+                  {(problem.testcases || []).map((tc, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveTestCase(idx + 1)}
+                      className={`px-2.5 py-0.5 rounded flex items-center gap-1 transition-colors ${
+                        activeTestCase === idx + 1
+                          ? 'font-bold'
+                          : 'text-slate-400 hover:bg-surface-container'
+                      }`}
+                      style={activeTestCase === idx + 1 ? { backgroundColor: '#252525', color: '#84cc16' } : {}}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#84cc16' }} />
+                      <span>Case {idx + 1} {tc.is_hidden ? '(Hidden)' : ''}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
 
               <div className="p-3 overflow-y-auto flex-1 flex flex-col gap-2">
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] text-slate-500 uppercase">nums =</label>
+                  <label className="text-[10px] text-slate-500 uppercase">Input =</label>
                   <input
                     type="text"
-                    value={tcNums}
-                    onChange={(e) => setTcNums(e.target.value)}
-                    className="w-full bg-slate-900 px-2.5 py-1 rounded text-white font-mono border border-slate-800 focus:outline-none focus:border-cyan-500"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] text-slate-500 uppercase">target =</label>
-                  <input
-                    type="text"
-                    value={tcTarget}
-                    onChange={(e) => setTcTarget(e.target.value)}
-                    className="w-full bg-slate-900 px-2.5 py-1 rounded text-white font-mono border border-slate-800 focus:outline-none focus:border-cyan-500"
+                    value={tcInput}
+                    onChange={(e) => setTcInput(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded text-white font-mono focus:outline-none"
+                    style={{ backgroundColor: '#1c1c1c', border: '1px solid #2e2e2e' }}
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Draggable Splitter Handle */}
-          <div className="hidden lg:flex w-1 bg-slate-950 hover:bg-cyan-500 transition-colors cursor-col-resize items-center justify-center group z-30">
-            <div className="w-0.5 h-8 rounded-full bg-slate-700 group-hover:bg-cyan-400" />
+          {/* VERTICAL DRAGGABLE SPLITTER HANDLE */}
+          <div
+            onMouseDown={() => setIsDraggingVertical(true)}
+            className="hidden lg:flex w-2 transition-colors cursor-col-resize items-center justify-center group z-30 relative select-none"
+            style={{ backgroundColor: isDraggingVertical ? '#84cc16' : '#111' }}
+            title="Drag to resize left & right panels"
+          >
+            <div
+              className="w-1 h-12 rounded-full transition-colors group-hover:bg-[#84cc16] flex items-center justify-center"
+              style={{ backgroundColor: isDraggingVertical ? '#0a0a0a' : '#333' }}
+            >
+              <GripVertical className="h-3 w-3 text-slate-400 group-hover:text-black" />
+            </div>
           </div>
 
           {/* RIGHT PANE: Code Editor & Execution */}
-          <div className="flex-1 flex flex-col bg-slate-950 overflow-hidden h-full">
+          <div
+            ref={rightPanelRef}
+            className="flex-1 flex flex-col overflow-hidden h-full"
+            style={{
+              width: `${100 - leftPanelWidth}%`,
+              backgroundColor: '#0a0a0a',
+            }}
+          >
             {/* Editor Toolbar */}
-            <div className="h-9 bg-slate-900 flex items-center justify-between px-3 border-b border-slate-800 font-mono text-xs">
+            <div className="h-9 flex items-center justify-between px-3 font-mono text-xs flex-shrink-0" style={{ backgroundColor: '#111', borderBottom: '1px solid #2e2e2e' }}>
               <div className="flex items-center gap-3">
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="bg-surface-container-lowest text-on-surface px-2.5 py-1 rounded cursor-pointer border border-outline-variant focus:outline-none font-code-sm text-code-sm"
+                  className="px-2.5 py-1 rounded cursor-pointer text-white focus:outline-none font-code-sm text-code-sm"
+                  style={{ backgroundColor: '#1c1c1c', border: '1px solid #2e2e2e' }}
                 >
                   <option value="cpp">C++</option>
                   <option value="java">Java</option>
@@ -414,7 +453,7 @@ function twoSum(nums: number[], target: number): number[] {
                 </select>
 
                 <div className="hidden sm:flex items-center gap-1.5 text-slate-400 text-xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#84cc16' }} />
                   <span>{saveStatus === 'saving' ? 'Saving...' : 'Saved 12s ago'}</span>
                 </div>
               </div>
@@ -423,7 +462,7 @@ function twoSum(nums: number[], target: number): number[] {
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="p-1 text-slate-400 hover:text-white rounded hover:bg-slate-800 transition-colors"
+                  className="p-1 text-slate-400 hover:text-white rounded transition-colors"
                   title="Reset code"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
@@ -432,48 +471,73 @@ function twoSum(nums: number[], target: number): number[] {
             </div>
 
             {/* Breadcrumbs Path */}
-            <div className="h-6 bg-slate-950 px-3 flex items-center gap-1 font-mono text-[11px] text-slate-500 border-b border-slate-800/60">
+            <div className="h-6 px-3 flex items-center gap-1 font-mono text-[11px] text-slate-500 flex-shrink-0" style={{ backgroundColor: '#111', borderBottom: '1px solid #2e2e2e' }}>
               <span className="text-slate-400">workspace</span>
               <span>›</span>
               <span className="text-slate-400">solutions</span>
               <span>›</span>
-              <span className="text-cyan-400 font-semibold flex items-center gap-1">
-                <FileCode className="h-3 w-3 text-cyan-400" />
-                two_sum.{language}
+              <span className="font-semibold flex items-center gap-1" style={{ color: '#84cc16' }}>
+                <FileCode className="h-3 w-3" style={{ color: '#84cc16' }} />
+                {problem.id}.{language}
               </span>
             </div>
 
-            {/* Code Content Area */}
-            <div className="flex-1 p-3 bg-slate-950 relative overflow-hidden font-mono text-xs">
-              <textarea
+            {/* Code Content Area — Integrated Monaco Editor Component */}
+            <div className="flex-1 relative overflow-hidden" style={{ backgroundColor: '#0a0a0a' }}>
+              <CodeEditor
                 value={code}
-                onChange={handleCodeChange}
-                spellCheck={false}
-                className="w-full h-full bg-transparent text-slate-100 resize-none focus:outline-none leading-relaxed selection:bg-cyan-500/30 selection:text-cyan-300"
+                language={language}
+                onChange={(val) => {
+                  const v = val || '';
+                  setCode(v);
+                  saveDraft(v);
+                }}
               />
             </div>
 
+            {/* HORIZONTAL DRAGGABLE SPLITTER HANDLE */}
+            <div
+              onMouseDown={() => setIsDraggingHorizontal(true)}
+              className="h-2 transition-colors cursor-row-resize items-center justify-center group z-30 relative select-none flex flex-shrink-0"
+              style={{ backgroundColor: isDraggingHorizontal ? '#84cc16' : '#111', borderTop: '1px solid #2e2e2e' }}
+              title="Drag to resize editor & test results height"
+            >
+              <div
+                className="h-1 w-12 rounded-full transition-colors group-hover:bg-[#84cc16] flex items-center justify-center"
+                style={{ backgroundColor: isDraggingHorizontal ? '#0a0a0a' : '#333' }}
+              >
+                <GripHorizontal className="h-3 w-3 text-slate-400 group-hover:text-black" />
+              </div>
+            </div>
+
             {/* Console Output Drawer */}
-            <div className="h-48 bg-slate-900 flex flex-col flex-shrink-0 border-t border-slate-800 font-mono text-xs">
-              <div className="h-8 bg-slate-950 flex items-center justify-between px-3 border-b border-slate-800">
+            <div
+              className="font-exclude flex flex-col flex-shrink-0 font-mono text-xs overflow-hidden"
+              style={{
+                height: `${consoleHeight}px`,
+                backgroundColor: '#1c1c1c',
+              }}
+            >
+              <div className="h-8 flex items-center justify-between px-3 flex-shrink-0" style={{ backgroundColor: '#111', borderBottom: '1px solid #2e2e2e' }}>
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setActiveConsoleTab('results')}
                     className={`px-3 py-1 font-medium flex items-center gap-1.5 rounded-t ${
                       activeConsoleTab === 'results'
-                        ? 'bg-slate-900 text-cyan-400'
+                        ? 'text-white'
                         : 'text-slate-400 hover:text-white'
                     }`}
+                    style={activeConsoleTab === 'results' ? { color: '#84cc16' } : {}}
                   >
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                    <CheckCircle2 className="h-3.5 w-3.5" style={{ color: '#84cc16' }} />
                     <span>Test Results</span>
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                  <span className="text-emerald-400 font-semibold">Memory: 44.2 MB</span>
+                <div className="flex items-center gap-2 text-[11px] text-slate-400" style={{ fontFamily: "'Roboto Condensed', 'Lexend Deca', sans-serif" }}>
+                  <span className="font-semibold" style={{ color: '#84cc16' }}>Memory: 44.2 MB</span>
                   <span>•</span>
-                  <span className="text-cyan-400 font-semibold">Runtime: 48 ms</span>
+                  <span className="font-semibold" style={{ color: '#84cc16' }}>Runtime: 48 ms</span>
                 </div>
               </div>
 
@@ -482,7 +546,7 @@ function twoSum(nums: number[], target: number): number[] {
                 {submitResult ? (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="px-2.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">
+                      <span className="px-2.5 py-0.5 rounded font-bold" style={{ backgroundColor: 'rgba(132, 204, 22, 0.15)', color: '#84cc16', border: '1px solid rgba(132, 204, 22, 0.3)' }}>
                         {submitResult.verdict.toUpperCase()}
                       </span>
                       <span className="text-white font-semibold">
@@ -493,7 +557,7 @@ function twoSum(nums: number[], target: number): number[] {
                   </div>
                 ) : runResult ? (
                   <div className="space-y-1.5">
-                    <span className="text-emerald-400 font-bold">Sample Tests Passed</span>
+                    <span className="font-bold" style={{ color: '#84cc16' }}>Sample Tests Passed</span>
                     {runResult.testResults.map((r, i) => (
                       <div key={i} className="text-slate-300 text-xs">
                         Case {i + 1}: Input {r.input} → Expected {r.expectedOutput}, Actual {r.actualOutput}
@@ -508,17 +572,18 @@ function twoSum(nums: number[], target: number): number[] {
               </div>
 
               {/* Bottom Action Bar */}
-              <div className="h-12 bg-slate-950 px-3 flex items-center justify-end flex-shrink-0 border-t border-slate-800">
+              <div className="h-12 px-3 flex items-center justify-end flex-shrink-0" style={{ backgroundColor: '#111', borderTop: '1px solid #2e2e2e' }}>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={handleRun}
                     disabled={isRunning || isSubmitting}
-                    className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs flex items-center gap-1.5 transition-all border border-slate-700 cursor-pointer disabled:opacity-50"
+                    className="px-3.5 py-1.5 rounded-lg text-white font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                    style={{ backgroundColor: '#252525', border: '1px solid #333' }}
                   >
                     {isRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5 fill-white" />}
                     <span>Run</span>
-                    <kbd className="hidden md:inline-block px-1 rounded bg-slate-900 text-[10px] text-slate-400 ml-1">
+                    <kbd className="hidden md:inline-block px-1 rounded text-[10px] text-slate-400 ml-1" style={{ backgroundColor: '#111' }}>
                       ⌘↵
                     </kbd>
                   </button>
@@ -527,7 +592,10 @@ function twoSum(nums: number[], target: number): number[] {
                     type="button"
                     onClick={handleSubmit}
                     disabled={isRunning || isSubmitting}
-                    className="px-4 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
+                    className="px-4 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all shadow-md cursor-pointer disabled:opacity-50"
+                    style={{ backgroundColor: '#84cc16', color: '#0a0a0a', boxShadow: '0 4px 20px rgba(132, 204, 22, 0.3)' }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#a3e635'; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#84cc16'; }}
                   >
                     {isSubmitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
                     <span>Submit</span>

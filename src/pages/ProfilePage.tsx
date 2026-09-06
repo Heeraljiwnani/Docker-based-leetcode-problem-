@@ -10,7 +10,7 @@ import { useStreak } from '../hooks/useStreak';
 import { useLanguageStats } from '../hooks/useLanguageStats';
 import { useSubmissionStats } from '../hooks/useSubmissionStats';
 
-import { User, CheckCircle2, Trophy, Zap, Sparkles } from 'lucide-react';
+import { CheckCircle2, Trophy, Flame, Sparkles } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {
   const { user } = useAuthStore();
@@ -53,30 +53,30 @@ export const ProfilePage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen text-on-surface flex flex-col font-sans antialiased selection:bg-primary/30 selection:text-primary" style={{ backgroundColor: '#0a0a0a' }}>
       {/* Top Navbar */}
       <Navbar />
 
       {/* Main Viewport */}
-      <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 py-6 sm:py-8">
+      <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 py-6 sm:py-8 pt-20">
         <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* LEFT SIDEBAR: User Info & Compact Stats */}
           <aside className="w-full lg:w-80 shrink-0 space-y-6">
             {/* User Info Card */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-md text-center space-y-4 shadow-xl">
+            <div className="rounded-xl p-6 text-center space-y-4 shadow-xl" style={{ backgroundColor: '#1c1c1c', border: '1px solid #2e2e2e' }}>
               <div className="relative inline-block">
-                <div className="h-20 w-20 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-bold text-2xl flex items-center justify-center mx-auto shadow-lg shadow-indigo-600/30 border-2 border-indigo-400">
+                <div className="h-20 w-20 rounded-full font-bold text-2xl flex items-center justify-center mx-auto shadow-lg border-2" style={{ backgroundColor: '#84cc16', color: '#0a0a0a', borderColor: '#a3e635' }}>
                   {userName.charAt(0).toUpperCase()}
                 </div>
-                <div className="absolute bottom-0 right-0 h-5 w-5 bg-emerald-500 rounded-full border-2 border-slate-950 flex items-center justify-center">
-                  <CheckCircle2 className="h-3 w-3 text-slate-950" />
+                <div className="absolute bottom-0 right-0 h-5 w-5 rounded-full border-2 flex items-center justify-center" style={{ backgroundColor: '#84cc16', borderColor: '#0a0a0a' }}>
+                  <CheckCircle2 className="h-3 w-3 text-black" />
                 </div>
               </div>
 
               <div>
-                <h2 className="text-xl font-bold text-white">{userName}</h2>
+                <h2 className="text-xl font-bold text-white" style={{ fontFamily: "'Doppio One', sans-serif" }}>{userName}</h2>
                 <p className="text-xs text-slate-400 font-mono mt-0.5">{userEmail}</p>
-                <div className="inline-flex items-center gap-1 mt-2.5 px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
+                <div className="inline-flex items-center gap-1 mt-2.5 px-2.5 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: 'rgba(132, 204, 22, 0.15)', color: '#84cc16', border: '1px solid rgba(132, 204, 22, 0.3)' }}>
                   <Trophy className="h-3 w-3" />
                   CodeArena Competitor
                 </div>
@@ -84,8 +84,8 @@ export const ProfilePage: React.FC = () => {
             </div>
 
             {/* Progress Difficulty Breakdown */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 backdrop-blur-md space-y-4">
-              <h3 className="text-sm font-semibold text-slate-200 border-b border-slate-800 pb-2">
+            <div className="rounded-xl p-5 space-y-4" style={{ backgroundColor: '#1c1c1c', border: '1px solid #2e2e2e' }}>
+              <h3 className="text-sm font-semibold text-slate-200 pb-2" style={{ borderBottom: '1px solid #2e2e2e', fontFamily: "'Doppio One', sans-serif" }}>
                 Problem Solving Progress
               </h3>
 
@@ -100,15 +100,16 @@ export const ProfilePage: React.FC = () => {
                   {/* Easy */}
                   <div className="space-y-1">
                     <div className="flex justify-between font-medium">
-                      <span className="text-emerald-400 font-semibold">Easy</span>
+                      <span className="font-semibold" style={{ color: '#84cc16' }}>Easy</span>
                       <span className="font-mono text-slate-300">
                         {easySolved}/{easyTotal}
                       </span>
                     </div>
-                    <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#111' }}>
                       <div
-                        className="h-full bg-emerald-500 rounded-full"
+                        className="h-full rounded-full"
                         style={{
+                          backgroundColor: '#84cc16',
                           width: `${Math.round((easySolved / easyTotal) * 100)}%`,
                         }}
                       />
@@ -123,7 +124,7 @@ export const ProfilePage: React.FC = () => {
                         {mediumSolved}/{mediumTotal}
                       </span>
                     </div>
-                    <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#111' }}>
                       <div
                         className="h-full bg-amber-500 rounded-full"
                         style={{
@@ -141,7 +142,7 @@ export const ProfilePage: React.FC = () => {
                         {hardSolved}/{hardTotal}
                       </span>
                     </div>
-                    <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#111' }}>
                       <div
                         className="h-full bg-rose-500 rounded-full"
                         style={{
@@ -163,20 +164,21 @@ export const ProfilePage: React.FC = () => {
             />
 
             {/* Most Solved by Tag */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 backdrop-blur-md space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <div className="rounded-xl p-4 space-y-3" style={{ backgroundColor: '#1c1c1c', border: '1px solid #2e2e2e' }}>
+              <div className="flex items-center justify-between pb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider" style={{ borderBottom: '1px solid #2e2e2e', fontFamily: "'Doppio One', sans-serif" }}>
                 <span>Most Solved by Tag</span>
-                <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
+                <Sparkles className="h-3.5 w-3.5" style={{ color: '#84cc16' }} />
               </div>
 
               <div className="flex flex-wrap gap-1.5 pt-1">
                 {popularTags.map((item) => (
                   <span
                     key={item.tag}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-slate-800/80 text-slate-300 border border-slate-700/60"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs text-slate-300"
+                    style={{ backgroundColor: '#111', border: '1px solid #2e2e2e' }}
                   >
                     <span>{item.tag}</span>
-                    <strong className="text-indigo-400 font-mono text-[11px]">
+                    <strong className="font-mono text-[11px]" style={{ color: '#84cc16' }}>
                       x{item.count}
                     </strong>
                   </span>
@@ -188,7 +190,7 @@ export const ProfilePage: React.FC = () => {
           {/* RIGHT MAIN CONTENT: Overall Completion, Heatmap & Recent Activity */}
           <div className="flex-1 w-full space-y-6">
             {/* Overall Completion Telemetry Card */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-md space-y-5 shadow-xl">
+            <div className="rounded-xl p-6 space-y-5 shadow-xl" style={{ backgroundColor: '#1c1c1c', border: '1px solid #2e2e2e' }}>
               <div className="flex items-center justify-between">
                 <div className="flex flex-col">
                   <span className="text-xs uppercase tracking-widest text-slate-400 font-mono font-medium">
@@ -201,14 +203,14 @@ export const ProfilePage: React.FC = () => {
                     <span className="text-sm font-mono text-slate-500">
                       / {totalCount.toLocaleString()}
                     </span>
-                    <span className="ml-2 text-sm font-mono text-cyan-400 font-semibold">
+                    <span className="ml-2 text-sm font-mono font-semibold" style={{ color: '#84cc16' }}>
                       ({pct}%)
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-full border border-amber-500/30">
-                  <Zap className="h-4 w-4 text-amber-400 fill-amber-400" />
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-500/30" style={{ backgroundColor: '#111' }}>
+                  <Flame className="h-4 w-4 text-orange-500 fill-orange-500" />
                   <span className="text-xs font-mono font-bold text-amber-400">
                     {streak?.currentStreak ?? 7}d Active Streak
                   </span>
@@ -218,13 +220,13 @@ export const ProfilePage: React.FC = () => {
               {/* Metric Bars */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-2">
                 {/* Easy */}
-                <div className="bg-slate-950/80 p-3 rounded-lg border border-slate-800 flex flex-col gap-1.5">
+                <div className="p-3 rounded-lg flex flex-col gap-1.5" style={{ backgroundColor: '#111', border: '1px solid #2e2e2e' }}>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-emerald-400 font-semibold">Easy</span>
+                    <span className="font-semibold" style={{ color: '#84cc16' }}>Easy</span>
                     <span className="text-slate-200 font-mono">{easySolved}<span className="text-slate-500">/{easyTotal}</span></span>
                   </div>
                   <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${Math.round((easySolved / easyTotal) * 100)}%` }} />
+                    <div className="h-full rounded-full" style={{ backgroundColor: '#84cc16', width: `${Math.round((easySolved / easyTotal) * 100)}%` }} />
                   </div>
                   <span className="text-slate-500 text-[11px] font-mono text-right">
                     {Math.round((easySolved / easyTotal) * 100)}%
@@ -232,7 +234,7 @@ export const ProfilePage: React.FC = () => {
                 </div>
 
                 {/* Medium */}
-                <div className="bg-slate-950/80 p-3 rounded-lg border border-slate-800 flex flex-col gap-1.5">
+                <div className="p-3 rounded-lg flex flex-col gap-1.5" style={{ backgroundColor: '#111', border: '1px solid #2e2e2e' }}>
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-amber-400 font-semibold">Medium</span>
                     <span className="text-slate-200 font-mono">{mediumSolved}<span className="text-slate-500">/{mediumTotal}</span></span>
@@ -246,7 +248,7 @@ export const ProfilePage: React.FC = () => {
                 </div>
 
                 {/* Hard */}
-                <div className="bg-slate-950/80 p-3 rounded-lg border border-slate-800 flex flex-col gap-1.5">
+                <div className="p-3 rounded-lg flex flex-col gap-1.5" style={{ backgroundColor: '#111', border: '1px solid #2e2e2e' }}>
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-rose-400 font-semibold">Hard</span>
                     <span className="text-slate-200 font-mono">{hardSolved}<span className="text-slate-500">/{hardTotal}</span></span>
@@ -261,7 +263,7 @@ export const ProfilePage: React.FC = () => {
               </div>
 
               {/* Multi-Segment Donut Ring & Rank */}
-              <div className="flex items-center gap-4 pt-1 border-t border-slate-800/80">
+              <div className="flex items-center gap-4 pt-1" style={{ borderTop: '1px solid #2e2e2e' }}>
                 <div className="relative w-12 h-12 flex-shrink-0">
                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                     <path
@@ -272,7 +274,7 @@ export const ProfilePage: React.FC = () => {
                       strokeWidth="3.5"
                     />
                     <path
-                      className="text-emerald-500"
+                      style={{ color: '#84cc16' }}
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                       fill="none"
                       stroke="currentColor"
